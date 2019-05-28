@@ -1,15 +1,16 @@
 import { connect } from 'src/drivers';
-import {
-    getPurchaseHistoryItems,
-    isPurchaseHistoryFetching
-} from 'src/selectors/purchaseHistory';
+import { transformItems } from 'src/selectors/purchaseHistory';
 import PurchaseHistory from './purchaseHistory';
 import actions, { getPurchaseHistory } from 'src/actions/purchaseHistory';
 
-const mapStateToProps = state => {
+const mapStateToProps = ({ purchaseHistory }) => {
+    const { isFetching } = purchaseHistory;
+
+    const items = transformItems(purchaseHistory.items);
+
     return {
-        items: getPurchaseHistoryItems(state),
-        isFetching: isPurchaseHistoryFetching(state)
+        isFetching,
+        items
     };
 };
 

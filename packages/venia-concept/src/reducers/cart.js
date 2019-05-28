@@ -6,47 +6,73 @@ import checkoutActions from 'src/actions/checkout';
 export const name = 'cart';
 
 export const initialState = {
+    addItemError: null,
+    cartId: null,
     details: {},
-    loading: false,
-    guestCartId: null,
+    detailsError: null,
+    isLoading: false,
+    isOptionsDrawerOpen: false,
+    isUpdatingItem: false,
+    isAddingItem: false,
     paymentMethods: [],
+    removeItemError: null,
     shippingMethods: [],
     totals: {},
-    isOptionsDrawerOpen: false,
-    isLoading: false
+    updateItemError: null
 };
 
 const reducerMap = {
-    [actions.getGuestCart.receive]: (state, { payload, error }) => {
+    [actions.getCart.receive]: (state, { payload, error }) => {
         if (error) {
             return initialState;
         }
 
         return {
             ...state,
-            guestCartId: payload
+            cartId: String(payload)
         };
     },
     [actions.getDetails.request]: (state, { payload }) => {
         return {
             ...state,
-            guestCartId: payload,
-            loading: true
+            cartId: String(payload),
+            isLoading: true
         };
     },
     [actions.getDetails.receive]: (state, { payload, error }) => {
         if (error) {
             return {
                 ...state,
-                loading: false,
-                guestCartId: null
+                detailsError: payload,
+                cartId: null,
+                isLoading: false
             };
         }
 
         return {
             ...state,
             ...payload,
-            loading: false
+            isLoading: false
+        };
+    },
+    [actions.addItem.request]: state => {
+        return {
+            ...state,
+            isAddingItem: true
+        };
+    },
+    [actions.addItem.receive]: (state, { payload, error }) => {
+        if (error) {
+            return {
+                ...state,
+                addItemError: payload,
+                isAddingItem: false
+            };
+        }
+
+        return {
+            ...state,
+            isAddingItem: false
         };
     },
     [actions.updateItem.request]: (state, { payload, error }) => {
@@ -56,12 +82,31 @@ const reducerMap = {
         return {
             ...state,
             ...payload,
-            isLoading: true
+            isUpdatingItem: true
+        };
+    },
+    [actions.updateItem.receive]: (state, { payload, error }) => {
+        if (error) {
+            return {
+                ...state,
+                isUpdatingItem: false,
+                updateItemError: payload
+            };
+        }
+
+        // We don't actually have to update any items here
+        // because we force a refresh from the server.
+        return {
+            ...state,
+            isUpdatingItem: false
         };
     },
     [actions.removeItem.receive]: (state, { payload, error }) => {
         if (error) {
-            return initialState;
+            return {
+                ...initialState,
+                removeItemError: payload
+            };
         }
         // If we are emptying the cart, perform a reset to prevent
         // a bug where the next item added to cart would have a price of 0
@@ -82,13 +127,13 @@ const reducerMap = {
     [actions.closeOptionsDrawer]: state => {
         return {
             ...state,
-            isOptionsDrawerOpen: false,
-            isLoading: false
+            isOptionsDrawerOpen: false
         };
     },
     [checkoutActions.order.accept]: () => {
         return initialState;
-    }
+    },
+    [actions.reset]: () => initialState
 };
 
 export default handleActions(reducerMap, initialState);

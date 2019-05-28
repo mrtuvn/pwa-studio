@@ -78,11 +78,9 @@ const jestConfig = {
                 inPackage('scripts/fetch-mock.js')
             ],
             // Set up Enzyme React 16 adapter for testing React components
-            setupTestFrameworkScriptFile: path.join(
-                '<rootDir>',
-                'scripts',
-                'jest-enzyme-setup.js'
-            ),
+            setupFilesAfterEnv: [
+                path.join('<rootDir>', 'scripts', 'jest-enzyme-setup.js')
+            ],
             // Give jsdom a real URL for router testing.
             testURL: 'https://localhost/'
         })),
@@ -103,11 +101,7 @@ const jestConfig = {
                 // This mapping forces CSS Modules to return literal identies,
                 // so e.g. `classes.root` is always `"root"`.
                 '\\.css$': 'identity-obj-proxy',
-                '\\.svg$': 'identity-obj-proxy',
-                // Re-write imports to Peregrine to ensure they're not pulled
-                // from the build artifacts on disk in `dist`.
-                '^@magento/peregrine(/*(?:.+)*)':
-                    '<rootDir>/packages/peregrine/$1'
+                '\\.svg$': 'identity-obj-proxy'
             },
             // Reproduce the Webpack resolution config that lets Venia import
             // from `src` instead of with relative paths:
@@ -117,11 +111,9 @@ const jestConfig = {
                 '<rootDir>/node_modules'
             ],
             // Set up Enzyme React 16 adapter for testing React components
-            setupTestFrameworkScriptFile: path.join(
-                '<rootDir>',
-                'scripts',
-                'jest-enzyme-setup.js'
-            ),
+            setupFilesAfterEnv: [
+                path.join('<rootDir>', 'scripts', 'jest-enzyme-setup.js')
+            ],
             // Give jsdom a real URL for router testing.
             testURL: 'https://localhost/',
             transform: {
@@ -141,7 +133,15 @@ const jestConfig = {
         configureProject('scripts', 'CI Scripts', () => ({
             testEnvironment: 'node',
             testMatch: [`<rootDir>/scripts/${testGlob}`]
-        }))
+        })),
+        // Test the graphql-cli plugin
+        configureProject(
+            'graphql-cli-validate-magento-pwa-queries',
+            'GraphQL CLI Plugin',
+            () => ({
+                testEnvironment: 'node'
+            })
+        )
     ],
     // Include files with zero tests in overall coverage analysis by specifying
     // coverage paths manually.
